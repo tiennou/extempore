@@ -60,6 +60,7 @@
 #ifdef TARGET_OS_WINDOWS
 #else
 #include <dirent.h>
+#include <libgen.h> // For dirname. Not sure it's available on Windows. See _splitpath_s there
 #endif
 
 #define PCRE_REGEX
@@ -694,31 +695,59 @@ namespace extemp {
 	return mk_integer(_sc,val);
     }
 	
+#ifdef TARGET_OS_MAC
+#define TARGET_DYLIB_PREFIX "lib"
+#define TARGET_DYLIB_EXT ".dylib"
+#elif TARGET_OS_LINUX
+#define TARGET_DYLIB_PREFIX "lib"
+#define TARGET_DYLIB_EXT ".so"
+#elif TARGET_OS_WINDOWS
+#define TARGET_DYLIB_PREFIX ""
+#define TARGET_DYLIB_EXT ".dll"
+#else
+#error Unknown OS, please define a TARGET_OS_ macro
+#endif
+
     pointer SchemeFFI::openDynamicLib(scheme* _sc, pointer args)
     {
-	//void* lib_handle = dlopen(string_value(pair_car(args)), RTLD_GLOBAL); //LAZY);
+        void *lib_handle = NULL;
+        char *lib_arg = string_value(pair_car(args));
+        char *lib_ext = strrchr(lib_arg, '.');
+        char *lib_path = dirname(lib_arg);
+
+        printf("sys:open-dylib: arg: \"%s\", path: \"%s\", ext: \"%s\"\n", lib_arg, lib_path, lib_ext);
+
+        if (strcmp(lib_path, ".") == 0 && lib_ext == NULL) {
+            /* If this is neither an absolute path nor a filename with a known dylib extension,
+             * append the current platform's lib separator.
+             */
+
+            sprintf(lib_path, "%s%s%s", TARGET_DYLIB_PREFIX, lib_arg, TARGET_DYLIB_EXT);
+        } else {
+            lib_path = lib_arg;
+        }
+
 #ifdef TARGET_OS_WINDOWS
-	  char* ccc = string_value(pair_car(args));
-	  size_t ccc_size = (strlen(ccc)+1) * 2; //2 for 16 bytes (wide_char)
-	  size_t converted_chars = 0;
-	  wchar_t* wstr = (wchar_t*) _alloca(ccc_size);
-	  mbstowcs_s(&converted_chars,wstr,ccc_size, ccc, _TRUNCATE);
-      void* lib_handle = LoadLibrary(wstr);
+        size_t lib_name_size = (strlen(lib_name) + 1) * 2; //2 for 16 bytes (wide_char)
+        size_t converted_chars = 0;
+        wchar_t *wstr = (wchar_t*) _alloca(lib_name_size);
+        mbstowcs_s(&converted_chars, wstr, lib_name_size, lib_name, _TRUNCATE);
+        void *lib_handle = LoadLibrary(wstr);
+        if (!lib_handle)
+        {
+            std::cout << "Error loading library" << GetLastError() << std::endl;
+            printf("For Library Path: %ls\n", wstr);
+            return _sc->F;
+        }
 #else
-	void* lib_handle = dlopen(string_value(pair_car(args)), RTLD_LAZY);
+        lib_handle = dlopen(lib_path, RTLD_LAZY);
+        if (!lib_handle)
+        {
+            fprintf(stderr, "%s\n", dlerror());
+            return _sc->F;
+        }
 #endif
-	if (!lib_handle)
-	{
-#ifdef TARGET_OS_WINDOWS
-	  std::cout << "Error loading library" << GetLastError() << std::endl;
-	  printf("For Library Path: %ls\n",wstr);
-	  return _sc->F;
-#else                       
-	  fprintf(stderr, "%s\n", dlerror());
-#endif
-	    return _sc->F;
-	}
-	return mk_cptr(_sc,lib_handle);
+        return mk_cptr(_sc, lib_handle);
     }
 
     pointer SchemeFFI::closeDynamicLib(scheme* _sc, pointer args)

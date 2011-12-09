@@ -34,7 +34,7 @@
 
 
 ;; load highgui dynamic library
-(define highguilib (sys:open-dylib "libhighgui.so.2.1"))
+(define highguilib (sys:open-dylib "highgui"))
                                
 ;; bind the symbols we need so that the
 ;; extempore compiler can find (and understand) them

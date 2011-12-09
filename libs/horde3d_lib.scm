@@ -4,17 +4,11 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define hordelib (if (string=? "Linux" (sys:platform))
-		     (sys:open-dylib "libHorde3D.so")
-		     (if (string=? "Windows" (sys:platform))
-			 (sys:open-dylib "Horde3D.dll")
-			 (sys:open-dylib "libHorde3D.dylib"))))
+(define hordelib
+    (sys:open-dylib "Horde3D"))
 
-(define hordeutlib (if (string=? "Linux" (sys:platform))
-		       (sys:open-dylib "libHorde3DUtils.so")
-		       (if (string=? "Windows" (sys:platform))
-			   (sys:open-dylib "Horde3DUtils.dll")
-			   (sys:open-dylib "libHorde3DUtils.dylib"))))
+(define hordeutlib
+    (sys:open-dylib "Horde3DUtils"))
 
 
 (bind-lib hordelib h3dInit [i1]*)

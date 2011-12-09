@@ -12,7 +12,7 @@
 
 
 ;; soil image lib
-(define soillib (sys:open-dylib "libSOIL.so.1"))
+(define soillib (sys:open-dylib "SOIL"))
 (bind-lib soillib SOIL_load_OGL_texture [i32,i8*,i32,i32,i32]*)
 (bind-lib soillib SOIL_load_image [i8*,i8*,i32*,i32*,i32*,i32]*)
 
@@ -42,7 +42,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; lib assimp
-(define libassimp (sys:open-dylib "libassimp.so"))
+(define libassimp (sys:open-dylib "assimp"))
 ;; lib GLU
 (define libglu (sys:open-dylib "libGLU.so"))
 

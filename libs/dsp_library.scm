@@ -754,13 +754,9 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; load highgui dynamic library
-(define libsndfile (if (string=? "Linux" (sys:platform))		       
-		       (sys:open-dylib "libsndfile.so.1")
-		       (if (string=? "OSX" (sys:platform))
-			   (sys:open-dylib "libsndfile.1.dylib")
-			   (sys:open-dylib "libsndfile-1.dll"))))
-
+;; load sndfile dynamic library
+(define libsndfile
+    (sys:open-dylib "sndfile"))
 
 ;; bind 3 sndfile lib functions
 (bind-lib libsndfile sf_open [i8*,i8*,i32,<i64,i32,i32,i32,i32,i32>*]*)
