@@ -754,18 +754,22 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; load sndfile dynamic library
-(define libsndfile
-    (sys:open-dylib "sndfile"))
+; our global library binding
+(define sf_lib ())
 
-;; bind 3 sndfile lib functions
-(bind-lib libsndfile sf_open [i8*,i8*,i32,<i64,i32,i32,i32,i32,i32>*]*)
-(bind-lib libsndfile sf_close [i32,i8*]*)
-(bind-lib libsndfile sf_write_sync [void,i8*]*)
-(bind-lib libsndfile sf_read_double [i64,i8*,double*,i64]*)
-(bind-lib libsndfile sf_write_double [i64,i8*,double*,i64]*)
-(bind-lib libsndfile sf_seek [i64,i8*,i64,i32]*)
-(bind-lib libsndfile sf_strerror [i8*,i8*]*)
+; load the sndfile library and bind its functions
+(define sf_init
+        (lambda ()
+            (if (null? sf_lib)
+                ((set! sf_lib (sys:open-dylib "sndfile"))
+                    (bind-lib sf_lib sf_open [i8*,i8*,i32,<i64,i32,i32,i32,i32,i32>*]*)
+                    (bind-lib sf_lib sf_close [i32,i8*]*)
+                    (bind-lib sf_lib sf_write_sync [void,i8*]*)
+                    (bind-lib sf_lib sf_read_double [i64,i8*,double*,i64]*)
+                    (bind-lib sf_lib sf_write_double [i64,i8*,double*,i64]*)
+                    (bind-lib sf_lib sf_seek [i64,i8*,i64,i32]*)
+                    (bind-lib sf_lib sf_strerror [i8*,i8*]*))
+                #t)))
 
 ;; size of audio data in file (in bytes)
 (definec print-audio-file-info
