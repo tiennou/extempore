@@ -278,7 +278,7 @@ namespace extemp {
 #endif
 	if(rc == 0) {
 	    this->closeREPL();
-	    printf("Could not connect to port %d. Make sure don't have any other instances of impromptu running and that no other app is using this port!",port);
+	    printf("Could not connect to port %d. Make sure don't have any other instances of extempore running and that no other app is using this port!",port);
 	    return false;
 	}
 
